@@ -5,6 +5,7 @@
 // @description  search and replace texts in report formulars
 // @author       a.boll
 // @match        https://www.tampermonkey.net/index.php?version=5.3.3&ext=dhdg&updated=true
+// @match        *planoncloud.com*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=tampermonkey.net
 // @grant        GM_addStyle
 // ==/UserScript==
