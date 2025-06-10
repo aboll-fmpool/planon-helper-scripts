@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Reports - Replace text in formular
 // @namespace    http://tampermonkey.net/
-// @version      2025-06-04
+// @version      0.1.0
 // @description  search and replace texts in report formulars
 // @author       a.boll
 // @match        https://www.tampermonkey.net/index.php?version=5.3.3&ext=dhdg&updated=true
