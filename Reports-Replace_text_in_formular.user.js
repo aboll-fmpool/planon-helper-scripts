@@ -1,11 +1,11 @@
 // ==UserScript==
 // @name         Reports - Replace text in formular
 // @namespace    http://tampermonkey.net/
-// @version      0.1.0
+// @version      0.1.1
 // @description  search and replace texts in report formulars
 // @author       a.boll
 // @match        https://www.tampermonkey.net/index.php?version=5.3.3&ext=dhdg&updated=true
-// @match        https://*planoncloud.com*
+// @include      https://*planoncloud.com*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=tampermonkey.net
 // @grant        GM_addStyle
 // ==/UserScript==
