@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         Reports - Replace text in formular - dev
+// @name         Reports - Replace text in formular - dev local
 // @namespace    http://tampermonkey.net/
 // @version      0.1.2
 // @description  search and replace texts in report formulars
@@ -77,6 +77,34 @@ GM_addStyle(`
     color: #000000;
 }
 
+.detailLog {
+    position: fixed;
+    right: 0px;
+    background-color: gray;
+    width: 750px;
+    top: 0px;
+}
+
+.detailLogRow {
+    display: inline-block;
+    width: 244px;
+    vertical-align: top;
+    border: solid 1px;
+}
+
+.detailLogButton {
+    display:inline;
+    background-color: gray;
+}
+
+.detailLogColumn.button {
+    background-color: white;
+}
+
+.detailLogRow.header {
+    background-color: darkgray;
+}
+
 `);
 
 (function () {
@@ -96,7 +124,14 @@ var $CONTROL_PANEL = `
             <select name="reports" id="reportConfigs"></select>
         </div>
     </div>
-    <div>Log: <input readonly class="log"\> </div>
+    <div>
+        Log: <input readonly class="log"\>
+        <div class="button detailLogButton">Details</div>
+        <div class="detailLog">
+            <h2>Replacements:<h2>
+            <div class="content"></div>
+        </div> 
+    </div>
     <div class="replaceValues">
         <div class="replaceItem fix">Search: <input class="textInput search" /> Replace: <input class="textInput replace"/><div class="addInput button">+</div></div>
     </div>
@@ -116,6 +151,7 @@ function createReplaceTextInExpressionPanel() {
         $(REPORT_DEFINITON_PANEL_SELECTOR + ' .reportTopPanel').append($CONTROL_PANEL);
         addReportConfig();
         addButtonAction();
+        $(".detailLog").toggle();
     });
 }
 
@@ -159,6 +195,7 @@ var $SELECT_FIELDS_LIST_LINK_SELECTOR = '.selectedFieldsPanel .tree-branch a.pn-
 var $SETTINGS_COLUMN_TEXT_SELECTOR = '.reportPropertiesPanel .BOGrid .fields-group-container .fields-group .field-editor-con input[name*="columnHeaderTextField"]';
 var $EXPRESSION_BUILDER_OKAY_BUTTON_SELECTOR = ".PnWebReportExpressionEditorDialog .okButton";
 var $EXPRESSION_BUILDER_EXPRESSION_TEXTAREA_SELECTOR = '.expression-textarea-field[name*="expressionsPanel:expressionArea"]';
+var $LOGS_EXPRESSION_CHANGES = [];
 
 function addButtonAction() {
     $(".abortAutomation").click(function () {
@@ -168,29 +205,68 @@ function addButtonAction() {
         addReplaceValuesItem();
     });
     $(".checkFields").click(function () {
-        $ABORT = false;
-        console.log("click button check fields");
-        var links = $($SELECT_FIELDS_LIST_LINK_SELECTOR);
-        $CONFIG = [];
-        $(".replaceValues .replaceItem").each(
-            function () {
-                var searchText = $.trim($(this).find(".search").val());
-                if (searchText === "") {
-                    $($LOG_SELECTOR).val("Search value is empty");
-                    $ABORT = true;
-                }
-                var replaceText = $.trim($(this).find(".replace").val());
-                if (replaceText === "") {
-                    $($LOG_SELECTOR).val("Replace value is empty");
-                    $ABORT = true;
-                }
-                $CONFIG.push({ search: searchText, replace: replaceText });
-            }
-        );
-        if (!$ABORT) {
-            processLinks(1, links);
-        }
+        replaceValuesInExpressions();
     });
+    $(".detailLogButton").click(function () {
+        showLogs();
+    });
+}
+
+function showLogs() {
+    $(".detailLog").toggle();
+    $(".detailLog .content").empty();
+    var logs = "";
+    var columns = "";
+    for (var i = 0; i < $LOGS_EXPRESSION_CHANGES.length; i++) {
+        columns += `<div class="detailLogColumn button" data-index="${i}">${$LOGS_EXPRESSION_CHANGES[i].column}</div>`;
+    }
+    logs += `<div>`;
+    logs += `<div class="detailLogRow header">Columns</div>`;
+    logs += `<div class="detailLogRow header">Old Formular</div>`;
+    logs += `<div class="detailLogRow header">New Formular</div>`;
+    logs += `<div class="detailLogRow">${columns}</div>`;
+    logs += `<div class="detailLogRow old"></div>`;
+    logs += `<div class="detailLogRow new"></div>`;
+    logs += `</div>`;
+    $(".detailLog .content").append(logs);
+    $(".detailLogColumn").click(function () {
+        console.log($(this));
+        var index = $(this).attr('data-index');
+        $(".detailLogRow.old").empty();
+        $(".detailLogRow.new").empty();
+        $(".detailLogRow.old").append($LOGS_EXPRESSION_CHANGES[index].old);
+        $(".detailLogRow.new").append($LOGS_EXPRESSION_CHANGES[index].new);
+    });
+}
+
+function replaceValuesInExpressions() {
+    $ABORT = false;
+    console.log("click button check fields");
+    setConfig();
+    var links = $($SELECT_FIELDS_LIST_LINK_SELECTOR);
+    if (!$ABORT) {
+        $LOGS_EXPRESSION_CHANGES = [];
+        processLinks(1, links);
+    }
+}
+
+function setConfig() {
+    $CONFIG = [];
+    $(".replaceValues .replaceItem").each(
+        function () {
+            var searchText = $.trim($(this).find(".search").val());
+            if (searchText === "") {
+                $($LOG_SELECTOR).val("Search value is empty");
+                $ABORT = true;
+            }
+            var replaceText = $.trim($(this).find(".replace").val());
+            if (replaceText === "") {
+                $($LOG_SELECTOR).val("Replace value is empty");
+                $ABORT = true;
+            }
+            $CONFIG.push({ search: searchText, replace: replaceText });
+        }
+    );
 }
 
 function addReplaceValuesItem() {
@@ -204,6 +280,7 @@ function processLinks(index, linkList) {
     console.log(['processLinks', index, linkList]);
     if (index >= linkList.length) {
         $($LOG_SELECTOR).val("Finished checking!");
+        console.log($LOGS_EXPRESSION_CHANGES);
         return;
     }
     var link = $(linkList[index]);
@@ -211,13 +288,14 @@ function processLinks(index, linkList) {
     $($LOG_SELECTOR).val("Checking: " + columnText);
     link.click();
     console.log(["processLinks -> clicked", link]);
-    waitForTextToAppear(columnText, $SETTINGS_COLUMN_TEXT_SELECTOR, checkFieldIfExpressionMatch, [index, linkList]);
+    waitForTextToAppear(columnText, $SETTINGS_COLUMN_TEXT_SELECTOR, checkFieldIfExpressionMatch, [index, linkList, columnText]);
 }
 
 function checkFieldIfExpressionMatch(args) {
     console.log(['checkFieldIfExpressionMatch', args]);
     var index = args[0];
     var linkList = args[1];
+    var columnText = args[2];
     var formular = $.trim($('.reportPropertiesPanel .BOGrid .fields-group-container .fields-group .field-editor-con input[name*="fullNameTextField"]').val());
     var includes = false;
 
@@ -229,7 +307,7 @@ function checkFieldIfExpressionMatch(args) {
     if (includes) {
         console.log(["found", formular]);
         $('a.pnicon-formula-pencil').click();
-        waitForElmentToAppear($EXPRESSION_BUILDER_EXPRESSION_TEXTAREA_SELECTOR, replaceTextInFormular, [index, linkList]);
+        waitForElmentToAppear($EXPRESSION_BUILDER_EXPRESSION_TEXTAREA_SELECTOR, replaceTextInFormular, [index, linkList, columnText]);
     } else {
         processLinks(index + 1, linkList);
     }
@@ -239,11 +317,19 @@ function replaceTextInFormular(args) {
     console.log("replaceTextInFormular", args);
     var index = args[0];
     var linkList = args[1];
+    var columnText = args[2];
     // TODO replace with unique placeholder and than use values from replace. So replace values can't override replace values
     var expressionText = $($EXPRESSION_BUILDER_EXPRESSION_TEXTAREA_SELECTOR).val();
+    var log = {
+        column: columnText,
+        old: expressionText,
+        new: ''
+    }
     for (var i = 0; i < $CONFIG.length; i++) {
         expressionText = expressionText.replaceAll($CONFIG[i].search, $CONFIG[i].replace);
     }
+    log.new = expressionText;
+    $LOGS_EXPRESSION_CHANGES.push(log);
     $($EXPRESSION_BUILDER_EXPRESSION_TEXTAREA_SELECTOR).val(expressionText);
     $($EXPRESSION_BUILDER_EXPRESSION_TEXTAREA_SELECTOR).click();
 
