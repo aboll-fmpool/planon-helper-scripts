@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name         Reports - Replace text in formular
+// @name         Reports - Replace text in formular - dev
 // @namespace    http://tampermonkey.net/
-// @version      0.1.1
+// @version      0.1.2
 // @description  search and replace texts in report formulars
 // @author       a.boll
 // @match        https://www.tampermonkey.net/index.php?version=5.3.3&ext=dhdg&updated=true
@@ -43,8 +43,6 @@ var $PRE_CONFIGS = [
     }
 ];
 
-// TODO add default config
-
 GM_addStyle(`
 .reportReplaceExpressionConsole {
     border:solid;
@@ -81,7 +79,7 @@ GM_addStyle(`
 
 `);
 
-(function() {
+(function () {
     'use strict';
 
     // Your code here...
@@ -91,31 +89,31 @@ GM_addStyle(`
 var $LOG_SELECTOR = ".reportReplaceExpressionConsole input.log"
 var $CONTROL_PANEL = `
 <div class="reportReplaceExpressionConsole">
-   <div class="controls">
-      <div class="checkFields button">Replace Text</div>
-      <div class="abortAutomation button">Abort</div>
-      <div> Report Configs:
-         <select name="reports" id="reportConfigs"></select>
-      <div>
-   </div>
-   <div>Log: <input readonly class="log"\> </div>
-   <div class="replaceValues">
-       <div class="replaceItem fix">Search: <input class="textInput search" /> Replace: <input class="textInput replace"/><div class="addInput button">+</div></div>
-   </div>
+    <div class="controls">
+        <div class="checkFields button">Replace Text</div>
+        <div class="abortAutomation button">Abort</div>
+        <div> Report Configs:
+            <select name="reports" id="reportConfigs"></select>
+        </div>
+    </div>
+    <div>Log: <input readonly class="log"\> </div>
+    <div class="replaceValues">
+        <div class="replaceItem fix">Search: <input class="textInput search" /> Replace: <input class="textInput replace"/><div class="addInput button">+</div></div>
+    </div>
 </div>
 `;
 var $NEW_RPLACE_ITEM = `<div class="replaceItem added">Search: <input class="textInput search" /> Replace: <input class="textInput replace"/><div class="removeInput button">-</div></div>`;
 
-function createReplaceTextInExpressionPanel(){
+function createReplaceTextInExpressionPanel() {
     waitForElm(REPORT_DEFINITON_PANEL_SELECTOR).then((elm) => {
         $(REPORT_DEFINITON_PANEL_SELECTOR).on("remove", function () {
             console.log('Element is destoried');
-            setTimeout(function(){
+            setTimeout(function () {
                 createReplaceTextInExpressionPanel();
             }, $TIME_OUT);
         });
         console.log('Element is ready');
-        $(REPORT_DEFINITON_PANEL_SELECTOR + ' .reportTopPanel').append( $CONTROL_PANEL );
+        $(REPORT_DEFINITON_PANEL_SELECTOR + ' .reportTopPanel').append($CONTROL_PANEL);
         addReportConfig();
         addButtonAction();
     });
@@ -124,7 +122,7 @@ function createReplaceTextInExpressionPanel(){
 
 var $REPORT_CONFIG_OPTION_SELECTOR = '.reportReplaceExpressionConsole #reportConfigs';
 
-function addReportConfig(){
+function addReportConfig() {
     $($REPORT_CONFIG_OPTION_SELECTOR).append($('<option>', {
         value: -1,
         text: ''
@@ -137,17 +135,16 @@ function addReportConfig(){
             }));
         }
     );
-    $( $REPORT_CONFIG_OPTION_SELECTOR ).on( "change", function() {
+    $($REPORT_CONFIG_OPTION_SELECTOR).on("change", function () {
         console.log();
         var selectedConfig = $($REPORT_CONFIG_OPTION_SELECTOR).val();
-        //$(".replaceValues .replaceItem").each()
         $('.replaceValues .replaceItem.added').remove();
         $('.replaceValues .replaceItem .textInput').val('');
-        if(selectedConfig >= 0){
+        if (selectedConfig >= 0) {
             console.log($PRE_CONFIGS);
             $PRE_CONFIGS[selectedConfig].params.forEach(
                 function addOption(item, index) {
-                    if(index > 0){
+                    if (index > 0) {
                         addReplaceValuesItem();
                     }
                     $('.replaceValues .replaceItem:last input.search').val(item.search);
@@ -155,7 +152,7 @@ function addReportConfig(){
                 }
             );
         }
-    } );
+    });
 }
 
 var $SELECT_FIELDS_LIST_LINK_SELECTOR = '.selectedFieldsPanel .tree-branch a.pn-node-link';
@@ -163,50 +160,49 @@ var $SETTINGS_COLUMN_TEXT_SELECTOR = '.reportPropertiesPanel .BOGrid .fields-gro
 var $EXPRESSION_BUILDER_OKAY_BUTTON_SELECTOR = ".PnWebReportExpressionEditorDialog .okButton";
 var $EXPRESSION_BUILDER_EXPRESSION_TEXTAREA_SELECTOR = '.expression-textarea-field[name*="expressionsPanel:expressionArea"]';
 
-function addButtonAction(){
-    $(".abortAutomation").click(function() {
+function addButtonAction() {
+    $(".abortAutomation").click(function () {
         $ABORT = true;
     });
-    $(".addInput").click(function() {
+    $(".addInput").click(function () {
         addReplaceValuesItem();
     });
-    $(".checkFields").click(function() {
+    $(".checkFields").click(function () {
         $ABORT = false;
         console.log("click button check fields");
         var links = $($SELECT_FIELDS_LIST_LINK_SELECTOR);
         $CONFIG = [];
         $(".replaceValues .replaceItem").each(
-            function(){
+            function () {
                 var searchText = $.trim($(this).find(".search").val());
-                if(searchText === ""){
+                if (searchText === "") {
                     $($LOG_SELECTOR).val("Search value is empty");
                     $ABORT = true;
                 }
                 var replaceText = $.trim($(this).find(".replace").val());
-                if(replaceText === ""){
+                if (replaceText === "") {
                     $($LOG_SELECTOR).val("Replace value is empty");
                     $ABORT = true;
                 }
-                $CONFIG.push({search: searchText, replace: replaceText});
+                $CONFIG.push({ search: searchText, replace: replaceText });
             }
         );
-        if(!$ABORT){
+        if (!$ABORT) {
             processLinks(1, links);
         }
     });
 }
 
-function addReplaceValuesItem(){
+function addReplaceValuesItem() {
     $(".replaceValues").append($NEW_RPLACE_ITEM);
-    $(".replaceValues .replaceItem:last .removeInput").click(function(){
+    $(".replaceValues .replaceItem:last .removeInput").click(function () {
         $(this).parent().remove();
-        console.log("remove");
     });
 }
 
-function processLinks(index, linkList){
+function processLinks(index, linkList) {
     console.log(['processLinks', index, linkList]);
-    if(index >= linkList.length) {
+    if (index >= linkList.length) {
         $($LOG_SELECTOR).val("Finished checking!");
         return;
     }
@@ -225,76 +221,76 @@ function checkFieldIfExpressionMatch(args) {
     var formular = $.trim($('.reportPropertiesPanel .BOGrid .fields-group-container .fields-group .field-editor-con input[name*="fullNameTextField"]').val());
     var includes = false;
 
-    for(var i = 0; i < $CONFIG.length; i++){
-        if(formular.includes($CONFIG[i].search) ){
+    for (var i = 0; i < $CONFIG.length; i++) {
+        if (formular.includes($CONFIG[i].search)) {
             includes = true;
         }
     }
-    if(includes){
-        console.log(["found",formular]);
+    if (includes) {
+        console.log(["found", formular]);
         $('a.pnicon-formula-pencil').click();
         waitForElmentToAppear($EXPRESSION_BUILDER_EXPRESSION_TEXTAREA_SELECTOR, replaceTextInFormular, [index, linkList]);
     } else {
-        processLinks(index+1, linkList);
+        processLinks(index + 1, linkList);
     }
 }
 
-function replaceTextInFormular(args){
+function replaceTextInFormular(args) {
     console.log("replaceTextInFormular", args);
     var index = args[0];
     var linkList = args[1];
     // TODO replace with unique placeholder and than use values from replace. So replace values can't override replace values
     var expressionText = $($EXPRESSION_BUILDER_EXPRESSION_TEXTAREA_SELECTOR).val();
-    for(var i = 0; i < $CONFIG.length; i++){
+    for (var i = 0; i < $CONFIG.length; i++) {
         expressionText = expressionText.replaceAll($CONFIG[i].search, $CONFIG[i].replace);
     }
     $($EXPRESSION_BUILDER_EXPRESSION_TEXTAREA_SELECTOR).val(expressionText);
     $($EXPRESSION_BUILDER_EXPRESSION_TEXTAREA_SELECTOR).click();
 
-    waitForElmentToAppear($EXPRESSION_BUILDER_OKAY_BUTTON_SELECTOR +'[aria-disabled="false"]', clickOkayInExpressionBuilder, args)
+    waitForElmentToAppear($EXPRESSION_BUILDER_OKAY_BUTTON_SELECTOR + '[aria-disabled="false"]', clickOkayInExpressionBuilder, args)
 }
 
-function clickOkayInExpressionBuilder(args){
+function clickOkayInExpressionBuilder(args) {
     var index = args[0];
     var linkList = args[1];
     $($EXPRESSION_BUILDER_OKAY_BUTTON_SELECTOR).click();
     $($EXPRESSION_BUILDER_OKAY_BUTTON_SELECTOR).on("remove", function () {
         console.log('Expression builder closed');
-        setTimeout(function(){
-            processLinks(index+1, $($SELECT_FIELDS_LIST_LINK_SELECTOR));
+        setTimeout(function () {
+            processLinks(index + 1, $($SELECT_FIELDS_LIST_LINK_SELECTOR));
         }, $TIME_OUT);
     });
 }
 
-function waitForElmentToAppear(selector, callback, callbackArgs){
+function waitForElmentToAppear(selector, callback, callbackArgs) {
     console.log(["waitForElmentToAppear", selector, callback, callbackArgs]);
-    if($ABORT){
+    if ($ABORT) {
         return;
     }
     var elementFound = false;
-    setTimeout(function(){
+    setTimeout(function () {
         elementFound = $(selector).length > 0;
         console.log(["compare", elementFound, selector, $(selector).length]);
-        if(!elementFound){
+        if (!elementFound) {
             waitForElmentToAppear(selector, callback, callbackArgs);
         } else {
-            console.log(["waitForElmentToAppear - callback",callbackArgs]);
+            console.log(["waitForElmentToAppear - callback", callbackArgs]);
             callback(callbackArgs);
         }
-    },$TIME_OUT);
+    }, $TIME_OUT);
 }
 
-function waitForTextToAppear(compareText, selector, callback, callbackArgs, counter){
+function waitForTextToAppear(compareText, selector, callback, callbackArgs, counter) {
     console.log(["waitForTextToAppear", compareText, selector, callback, callbackArgs, counter]);
-    if($ABORT){
+    if ($ABORT) {
         return;
     }
-    if(isNaN(counter)) {
-        counter=0;
+    if (isNaN(counter)) {
+        counter = 0;
     } else {
         counter++;
     }
-    if(counter > 25){
+    if (counter > 25) {
         // restart from current pos
         var index = callbackArgs[0];
         var linkList = callbackArgs[1];
@@ -302,16 +298,16 @@ function waitForTextToAppear(compareText, selector, callback, callbackArgs, coun
         return;
     }
     var labelText = "";
-    setTimeout(function(){
+    setTimeout(function () {
         labelText = $.trim($(selector).val());
         console.log(["compare", labelText, compareText]);
-        if(labelText != compareText){
+        if (labelText != compareText) {
             waitForTextToAppear(compareText, selector, callback, callbackArgs, counter);
         } else {
-            console.log(["waitForTextToAppear - callback",callbackArgs]);
+            console.log(["waitForTextToAppear - callback", callbackArgs]);
             callback(callbackArgs);
         }
-    },$TIME_OUT);
+    }, $TIME_OUT);
 }
 
 
