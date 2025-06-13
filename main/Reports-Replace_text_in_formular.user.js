@@ -159,6 +159,10 @@ class ReplaceTextInReportFormulars {
     constructor() {
         this.config = [];
         // TODO  https://stackoverflow.com/questions/1479319/simplest-cleanest-way-to-implement-a-singleton-in-javascript
+        if(ReplaceTextInReportFormulars._instance) {
+            return ReplaceTextInReportFormulars._instance;
+        }
+        ReplaceTextInReportFormulars._instance = this;
     }
 
     createReplaceTextInExpressionPanel() {
@@ -166,7 +170,8 @@ class ReplaceTextInReportFormulars {
             $(REPORT_DEFINITON_PANEL_SELECTOR).on("remove", function () {
                 console.log('Element is destoried');
                 setTimeout(function () {
-                    this.createReplaceTextInExpressionPanel();
+                    var instance = new ReplaceTextInReportFormulars();
+                    instance.createReplaceTextInExpressionPanel();
                 }, $TIME_OUT);
             });
             console.log('Element is ready');
@@ -201,7 +206,8 @@ class ReplaceTextInReportFormulars {
                 $PRE_CONFIGS[selectedConfig].params.forEach(
                     function addOption(item, index) {
                         if (index > 0) {
-                            myInstance.addReplaceValuesItem();
+                            var instance = new ReplaceTextInReportFormulars();
+                            instance.addReplaceValuesItem();
                         }
                         $('.replaceValues .replaceItem:last input.search').val(item.search);
                         $('.replaceValues .replaceItem:last input.replace').val(item.replace);
@@ -219,13 +225,16 @@ class ReplaceTextInReportFormulars {
             $ABORT = true;
         });
         $(".addInput").click(function () {
-            myInstance.addReplaceValuesItem();
+            var instance = new ReplaceTextInReportFormulars();
+            instance.addReplaceValuesItem();
         });
         $(".checkFields").click(function () {
-            myInstance.replaceValuesInExpressions();
+            var instance = new ReplaceTextInReportFormulars();
+            instance.replaceValuesInExpressions();
         });
         $(".detailLogButton").click(function () {
-            myInstance.showLogs();
+            var instance = new ReplaceTextInReportFormulars();
+            instance.showLogs();
         });
     }
 
@@ -318,7 +327,8 @@ class ReplaceTextInReportFormulars {
     errorProcessLinks(args) {
         var index = args[0];
         var linkList = $($SELECT_FIELDS_LIST_LINK_SELECTOR);
-        myInstance.processLinks(index, linkList);
+        var instance = new ReplaceTextInReportFormulars();
+        instance.processLinks(index, linkList);
     }
 
     checkFieldIfExpressionMatch(args) {
@@ -329,17 +339,18 @@ class ReplaceTextInReportFormulars {
         var formular = $.trim($('.reportPropertiesPanel .BOGrid .fields-group-container .fields-group .field-editor-con input[name*="fullNameTextField"]').val());
         var includes = false;
 
-        for (var i = 0; i < myInstance.config.length; i++) {
-            if (formular.includes(myInstance.config[i].search)) {
+        var instance = new ReplaceTextInReportFormulars();
+        for (var i = 0; i < instance.config.length; i++) {
+            if (formular.includes(instance.config[i].search)) {
                 includes = true;
             }
         }
         if (includes) {
             console.log(["found", formular]);
             $('a.pnicon-formula-pencil').click();
-            myInstance.waitForElmentToAppear($EXPRESSION_BUILDER_EXPRESSION_TEXTAREA_SELECTOR, myInstance.replaceTextInFormular, [index, linkList, columnText]);
+            instance.waitForElmentToAppear($EXPRESSION_BUILDER_EXPRESSION_TEXTAREA_SELECTOR, instance.replaceTextInFormular, [index, linkList, columnText]);
         } else {
-            myInstance.processLinks(index + 1, linkList);
+            instance.processLinks(index + 1, linkList);
         }
     }
 
@@ -353,11 +364,12 @@ class ReplaceTextInReportFormulars {
             new: ''
         }
         var i;
-        for (i = 0; i < myInstance.config.length; i++) {
-            expressionText = expressionText.replaceAll(myInstance.config[i].search, $REPLACEMENT_STRING + i);
+        var instance = new ReplaceTextInReportFormulars();
+        for (i = 0; i < instance.config.length; i++) {
+            expressionText = expressionText.replaceAll(instance.config[i].search, $REPLACEMENT_STRING + i);
         }
-        for (i = 0; i < myInstance.config.length; i++) {
-            expressionText = expressionText.replaceAll($REPLACEMENT_STRING + i, myInstance.config[i].replace);
+        for (i = 0; i < instance.config.length; i++) {
+            expressionText = expressionText.replaceAll($REPLACEMENT_STRING + i, instance.config[i].replace);
         }
         log.new = expressionText;
         $LOGS_EXPRESSION_CHANGES.push(log);
@@ -365,7 +377,7 @@ class ReplaceTextInReportFormulars {
         $($EXPRESSION_BUILDER_EXPRESSION_TEXTAREA_SELECTOR).val(expressionText);
         $($EXPRESSION_BUILDER_EXPRESSION_TEXTAREA_SELECTOR).click();
 
-        myInstance.waitForElmentToAppear($EXPRESSION_BUILDER_OKAY_BUTTON_SELECTOR + '[aria-disabled="false"]', myInstance.clickOkayInExpressionBuilder, args)
+        instance.waitForElmentToAppear($EXPRESSION_BUILDER_OKAY_BUTTON_SELECTOR + '[aria-disabled="false"]', instance.clickOkayInExpressionBuilder, args)
     }
 
     clickOkayInExpressionBuilder(args) {
@@ -375,7 +387,8 @@ class ReplaceTextInReportFormulars {
         $($EXPRESSION_BUILDER_OKAY_BUTTON_SELECTOR).on("remove", function () {
             console.log('Expression builder closed');
             setTimeout(function () {
-                myInstance.processLinks(index + 1, $($SELECT_FIELDS_LIST_LINK_SELECTOR));
+                var instance = new ReplaceTextInReportFormulars();
+                instance.processLinks(index + 1, $($SELECT_FIELDS_LIST_LINK_SELECTOR));
             }, $TIME_OUT);
         });
     }
@@ -390,7 +403,8 @@ class ReplaceTextInReportFormulars {
             elementFound = $(selector).length > 0;
             console.log(["compare", elementFound, selector, $(selector).length]);
             if (!elementFound) {
-                myInstance.waitForElmentToAppear(selector, callback, callbackArgs);
+                var instance = new ReplaceTextInReportFormulars();
+                instance.waitForElmentToAppear(selector, callback, callbackArgs);
             } else {
                 console.log(["waitForElmentToAppear - callback", callbackArgs]);
                 callback(callbackArgs);
@@ -418,7 +432,8 @@ class ReplaceTextInReportFormulars {
             labelText = $.trim($(selector).val());
             console.log(["compare", labelText, compareText]);
             if (labelText != compareText) {
-                myInstance.waitForTextToAppear(compareText, selector, callback, callbackArgs, callbackOnFailure, counter);
+                var instance = new ReplaceTextInReportFormulars();
+                instance.waitForTextToAppear(compareText, selector, callback, callbackArgs, callbackOnFailure, counter);
             } else {
                 console.log(["waitForTextToAppear - callback", callbackArgs]);
                 callback(callbackArgs);
