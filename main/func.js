@@ -25,4 +25,4 @@ function createClass() {
 }
 
 const inst = new toSt();
-module.exports = inst;
+module.exports = toSt;

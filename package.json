@@ -7,5 +7,8 @@
   },
   "scripts": {
     "test": "jest"
+  },
+  "dependencies": {
+    "jsdom": "^26.1.0"
   }
 }

@@ -1,7 +1,7 @@
 //import {GM_addStyle} from '../Reports-Replace_text_in_formular.user'
 //import { describe, expect, test } from '@jest/globals';
 
-require('../test/mock');
+require('./mock');
 // const sut = require('../main/Reports-Replace_text_in_formular.user');
 const sut = require('../main/func');
 const mockFn = jest.fn().mockName('GM_addStyle');
@@ -15,9 +15,9 @@ describe('Reports-Replace_text_in_formular', () => {
     //GM_addStyle(mockCallback)
     //sut.replaceTextInFormular();
     //expect(sum(.1, 2)).toBe(3);
-  
+    var k = new sut();
     
-    expect(sut.test()).toBe(1);
+    expect(k.test()).toBe(1);
     //replaceTextInExpressionFormular.replaceTextInExpressionFormular();
   });
 });

@@ -12,7 +12,7 @@
 // ==/UserScript==
 /* global $ */
 
-/*
+
 GM_addStyle(`
 .reportReplaceExpressionConsole {
     border:solid;
@@ -76,7 +76,7 @@ GM_addStyle(`
 }
 
 `);
-*/
+
 
 
 var REPORT_DEFINITON_PANEL_SELECTOR = ".PnWebReportDefinitionDialog";
@@ -437,4 +437,4 @@ const myInstance = new ReplaceTextInReportFormulars();
 })();
 
 // export default replaceTextInExpressionFormular;
-module.exports = myInstance;
+module.exports = ReplaceTextInReportFormulars;
