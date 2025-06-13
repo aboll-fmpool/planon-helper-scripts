@@ -82,7 +82,6 @@ GM_addStyle(`
 var REPORT_DEFINITON_PANEL_SELECTOR = ".PnWebReportDefinitionDialog";
 var $TIME_OUT = 100;
 var $ABORT = false;
-var $CONFIG = [];
 var $PRE_CONFIGS = [
     {
         name: 'MKCO-prefatturazione_SpaceUsage_(04e)-Dettaglio_ExportXLS (MT)',
@@ -148,6 +147,11 @@ var $LOGS_EXPRESSION_CHANGES = [];
 var $REPLACEMENT_STRING = "$!#_REPLACE_THIS_STRING_";
 
 class ReplaceTextInReportFormulars {
+
+    constructor() {
+        this.config = [];
+    }
+
     createReplaceTextInExpressionPanel() {
         this.waitForElm(REPORT_DEFINITON_PANEL_SELECTOR).then((elm) => {
             $(REPORT_DEFINITON_PANEL_SELECTOR).on("remove", function () {
@@ -255,7 +259,9 @@ class ReplaceTextInReportFormulars {
     }
 
     setConfig() {
-        $CONFIG = [];
+        this.config = [];
+        console.log([$, $("asd")]);
+        var tempConf = [];
         $(".replaceValues .replaceItem").each(
             function () {
                 var searchText = $.trim($(this).find(".search").val());
@@ -268,9 +274,11 @@ class ReplaceTextInReportFormulars {
                     $($LOG_SELECTOR).val("Replace value is empty");
                     $ABORT = true;
                 }
-                $CONFIG.push({ search: searchText, replace: replaceText });
+                tempConf.push({ search: searchText, replace: replaceText });
             }
         );
+        this.config = tempConf;
+        console.log(this.config);
     }
 
     addReplaceValuesItem() {
@@ -309,15 +317,15 @@ class ReplaceTextInReportFormulars {
         var formular = $.trim($('.reportPropertiesPanel .BOGrid .fields-group-container .fields-group .field-editor-con input[name*="fullNameTextField"]').val());
         var includes = false;
 
-        for (var i = 0; i < $CONFIG.length; i++) {
-            if (formular.includes($CONFIG[i].search)) {
+        for (var i = 0; i < this.config.length; i++) {
+            if (formular.includes(this.config[i].search)) {
                 includes = true;
             }
         }
         if (includes) {
             console.log(["found", formular]);
             $('a.pnicon-formula-pencil').click();
-            waitForElmentToAppear($EXPRESSION_BUILDER_EXPRESSION_TEXTAREA_SELECTOR, replaceTextInFormular, [index, linkList, columnText]);
+            this.waitForElmentToAppear($EXPRESSION_BUILDER_EXPRESSION_TEXTAREA_SELECTOR, replaceTextInFormular, [index, linkList, columnText]);
         } else {
             processLinks(index + 1, linkList);
         }
@@ -332,18 +340,18 @@ class ReplaceTextInReportFormulars {
             old: expressionText,
             new: ''
         }
-        for (var i = 0; i < $CONFIG.length; i++) {
-            expressionText = expressionText.replaceAll($CONFIG[i].search, $REPLACEMENT_STRING + i);
+        for (var i = 0; i < this.config.length; i++) {
+            expressionText = expressionText.replaceAll(this.config[i].search, $REPLACEMENT_STRING + i);
         }
-        for (var i = 0; i < $CONFIG.length; i++) {
-            expressionText = expressionText.replaceAll($REPLACEMENT_STRING + i, $CONFIG[i].replace);
+        for (var i = 0; i < this.config.length; i++) {
+            expressionText = expressionText.replaceAll($REPLACEMENT_STRING + i, this.config[i].replace);
         }
         log.new = expressionText;
         $LOGS_EXPRESSION_CHANGES.push(log);
         $($EXPRESSION_BUILDER_EXPRESSION_TEXTAREA_SELECTOR).val(expressionText);
         $($EXPRESSION_BUILDER_EXPRESSION_TEXTAREA_SELECTOR).click();
 
-        waitForElmentToAppear($EXPRESSION_BUILDER_OKAY_BUTTON_SELECTOR + '[aria-disabled="false"]', clickOkayInExpressionBuilder, args)
+        //this.waitForElmentToAppear($EXPRESSION_BUILDER_OKAY_BUTTON_SELECTOR + '[aria-disabled="false"]', this.clickOkayInExpressionBuilder, args)
     }
 
     clickOkayInExpressionBuilder(args) {
@@ -368,7 +376,7 @@ class ReplaceTextInReportFormulars {
             elementFound = $(selector).length > 0;
             console.log(["compare", elementFound, selector, $(selector).length]);
             if (!elementFound) {
-                waitForElmentToAppear(selector, callback, callbackArgs);
+                this.waitForElmentToAppear(selector, callback, callbackArgs);
             } else {
                 console.log(["waitForElmentToAppear - callback", callbackArgs]);
                 callback(callbackArgs);

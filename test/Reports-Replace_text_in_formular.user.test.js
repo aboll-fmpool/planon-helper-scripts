@@ -4,38 +4,85 @@ const { window } = new JSDOM();
 const { document } = (new JSDOM('')).window;
 global.document = document;
 global.MutationObserver = class {
-    constructor(callback) {}
-    disconnect() {}
-    observe(element, initObject) {}
+  constructor(callback) { }
+  disconnect() { }
+  observe(element, initObject) { }
 };
-global.GM_addStyle = function(){};
-// var $ = jQuery = require('jquery')(window);
-/*
-jsdom.env(
-  "https://iojs.org/dist/",
-  ["http://code.jquery.com/jquery.js"],
-  function (err, window) {
-    console.log("there have been", window.$("a").length - 4, "io.js releases!");
-  }
-);
-*/
-//const dom = new JSDOM(`<!DOCTYPE html><p>Hello world</p>`);
-//var window = dom.window;
-const clazz = require('../main/Reports-Replace_text_in_formular.user');
-// const mockFn = jest.fn().mockName('GM_addStyle');
-//jest.mock('GM_addStyle')
-//import replaceTextInExpressionFormular from '../main/Reports-Replace_text_in_formular.user'
+global.GM_addStyle = function () { };
 
-const mockCallback = jest.fn(x => 42 + x);
+var mockInstance = new class JQMock {
+
+  constructor() {
+    this.mockedVal = "";
+    this.findValues = [];
+  }
+
+  setVal(val) {
+    this.mockedVal = val;
+  }
+
+  addFindValue(identifier, val) {
+    var inst = new JQMock();
+    inst.setVal(val)
+    this.findValues.push({
+      identifier: identifier,
+      val: inst
+    });
+  }
+
+  standard() {
+    return "standard";
+  }
+
+  val() {
+    return this.mockedVal;
+  }
+
+  each(func) {
+    func();
+  };
+
+  find(identifier) {
+    for (var i = 0; i < this.findValues.length; i++) {
+      if (this.findValues[i].identifier == identifier) {
+        return this.findValues[i].val;
+      }
+    }
+    console.log(["no identifer for: " + identifier, this.findValues]);
+  }
+
+  click() {
+
+  }
+
+};
+var jQueryMock = function () { return mockInstance; }
+
+// use real jQuery
+// global.$ = global.jQuery = require('jquery')(window);
+global.$ = jQueryMock;
+global.$.trim = function (text) { return text; };
+
+const clazz = require('../main/Reports-Replace_text_in_formular.user');
 
 describe('Reports-Replace_text_in_formular', () => {
   test('replaceTextInFormular should replace text', () => {
-    //GM_addStyle(mockCallback)
-    //sut.replaceTextInFormular();
-    //expect(sum(.1, 2)).toBe(3);
+    // Arrange
+    var expression = '"01-04-2025, 01-03-2025"';
+    mockInstance.setVal(expression);
+    mockInstance.addFindValue(".search", "01-03-2025");
+    mockInstance.addFindValue(".replace", "01-04-2025");
+
     var sut = new clazz();
-  
-    expect(sut.replaceTextInFormular(['', 'myColumnText'])).toBe(1);
-    //replaceTextInExpressionFormular.replaceTextInExpressionFormular();
+    sut.setConfig();
+
+    var expected = '"01-05-2025, 01-04-2025"';
+
+    // Act
+    sut.replaceTextInFormular(['', 'myColumnText'])
+    var actual = $('.expression-textarea-field[name*="expressionsPanel:expressionArea"]').val();
+
+    // Assert
+    expect(actual).toBe(expected);
   });
 });
