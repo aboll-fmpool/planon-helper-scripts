@@ -260,11 +260,13 @@ class ReplaceTextInReportFormulars {
 
     setConfig() {
         this.config = [];
-        console.log([$, $("asd")]);
         var tempConf = [];
+        console.log(["find items", $(".replaceValues .replaceItem"), $(".replaceValues .replaceItem").text(), $("body").html()]);
         $(".replaceValues .replaceItem").each(
             function () {
+                console.log(["for each", this]);
                 var searchText = $.trim($(this).find(".search").val());
+                console.log(["stext", searchText]);
                 if (searchText === "") {
                     $($LOG_SELECTOR).val("Search value is empty");
                     $ABORT = true;
@@ -278,7 +280,7 @@ class ReplaceTextInReportFormulars {
             }
         );
         this.config = tempConf;
-        console.log(this.config);
+        console.log("conf", this.config);
     }
 
     addReplaceValuesItem() {
