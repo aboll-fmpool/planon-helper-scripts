@@ -26,6 +26,7 @@ var config = `
 
 var column = `
   <input class="expression-textarea-field" name=expressionsPanel:expressionArea" value="01-04-2025, 01-03-2025">
+  <div class="PnWebReportExpressionEditorDialog"><input class="okButton" aria-disabled="false"></div>';
 `;
 
 describe('Reports-Replace_text_in_formular', () => {
@@ -33,6 +34,8 @@ describe('Reports-Replace_text_in_formular', () => {
     // Arrange
     $("body").append(config);
     $("body").append(column);
+
+    //console.log(["from TEst", myInstance]);
 
 
     var sut = new clazz();
