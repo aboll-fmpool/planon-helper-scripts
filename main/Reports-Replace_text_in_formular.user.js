@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         Reports - Replace text in formular - dev local
+// @name         Reports - Replace text in formular - dev
 // @namespace    http://tampermonkey.net/
 // @version      0.1.2
 // @description  search and replace texts in report formulars
