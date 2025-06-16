@@ -1,0 +1,1 @@
+const GM_addStyle = () => {};
