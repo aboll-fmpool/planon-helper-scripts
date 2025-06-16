@@ -60,6 +60,14 @@ GM_addStyle(`
    font-size: 14px;
 }
 
+.detailLog .closeDetailog{
+   display:inline;
+}
+
+.detailLogHeader{
+    display:inline;
+}
+
 .detailLogRow {
     display: inline-block;
     width: 244px;
@@ -72,6 +80,7 @@ GM_addStyle(`
 .detailLogButton {
     display:inline;
     background-color: gray;
+    width: 8px;
 }
 
 .detailLogColumn.button {
@@ -81,6 +90,7 @@ GM_addStyle(`
 
 .detailLogRow.header {
     background-color: darkgray;
+    color: black;
 }
 
 `);
@@ -95,14 +105,6 @@ var $PRE_CONFIGS = [
         name: 'MKCO-prefatturazione_SpaceUsage_(04e)-Dettaglio_ExportXLS (MT)',
         params: [
             {
-                search: '30-04-2025',
-                replace: '31-05-2025'
-            },
-            {
-                search: '01-04-2025',
-                replace: '01-05-2025'
-            },
-            {
                 search: '31-03-2025',
                 replace: '30-04-2025'
             },
@@ -111,8 +113,16 @@ var $PRE_CONFIGS = [
                 replace: '01-04-2025'
             },
             {
-                search: '"04-2025"',
-                replace: '"05-2025"'
+                search: '28-02-2025',
+                replace: '31-03-2025'
+            },
+            {
+                search: '01-02-2025',
+                replace: '01-03-2025'
+            },
+            {
+                search: '"03-2025"',
+                replace: '"04-2025"'
             }
         ]
     }
@@ -133,7 +143,8 @@ var $CONTROL_PANEL = `
         Log: <input readonly class="log"\>
         <div class="button detailLogButton">Details</div>
         <div class="detailLog">
-            <h2>Replacements:<h2>
+            <div class="closeDetailog button">X</div>
+            <h2 class="detailLogHeader">Replacements:<h2>
             <div class="content"></div>
         </div>
     </div>
@@ -246,6 +257,10 @@ class ReplaceTextInReportFormulars {
         for (var i = 0; i < $LOGS_EXPRESSION_CHANGES.length; i++) {
             columns += `<div class="detailLogColumn button" data-index="${i}">${$LOGS_EXPRESSION_CHANGES[i].column}</div>`;
         }
+        $(".closeDetailog").click(function () {
+            $(".detailLog").toggle();
+        });
+
         logs += `<div>`;
         logs += `<div class="detailLogRow header">Columns</div>`;
         logs += `<div class="detailLogRow header">Old Formular</div>`;
@@ -473,4 +488,6 @@ const myInstance = new ReplaceTextInReportFormulars();
     myInstance.createReplaceTextInExpressionPanel();
 })();
 
-module.exports = ReplaceTextInReportFormulars;
+if(module !== undefined && module.exports !== undefined) {
+    module.exports = ReplaceTextInReportFormulars;
+}
